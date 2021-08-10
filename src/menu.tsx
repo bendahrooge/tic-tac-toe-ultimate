@@ -1,14 +1,19 @@
-import React from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import React, {useContext} from "react";
+import { Animated, StyleSheet, Text, View, Pressable } from "react-native";
 
-import { Scenes } from "./constants";
+import { Scenes, GlobalContext } from "./constants";
 
 export default function Menu(props: any) {
+  const {scene, setScene} = useContext(GlobalContext);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tic Tac Toe</Text>
-      <Pressable style={styles.btn} onPress={() => props.sceneChanger(Scenes.GAME)}>
-        <Text style={styles.text}>Start Game</Text>
+      <Text style={styles.title}>Ultimate {"\n"} Tic Tac Toe</Text>
+      <Pressable style={styles.btn} onPress={() => setScene(Scenes.GAME)}>
+        <Text style={styles.text}>Singleplayer</Text>
+      </Pressable>
+      <Pressable style={styles.btn} onPress={() => setScene(Scenes.GAME)}>
+        <Text style={styles.text}>Multi-player</Text>
       </Pressable>
     </View>
   );
@@ -22,6 +27,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 50,
+    textAlign: "center",
   },
   btn: {
     padding: 20,

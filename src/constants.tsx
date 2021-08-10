@@ -1,3 +1,5 @@
+import React from 'react'
+
 export enum Scenes {
   /**
    * The game's starting menu
@@ -40,3 +42,12 @@ export const DEFAULT_TABLE = () => [
   [DEFAULT_BOARD(), DEFAULT_BOARD(), DEFAULT_BOARD()],
   [DEFAULT_BOARD(), DEFAULT_BOARD(), DEFAULT_BOARD()],
 ];
+
+/**
+ * Context object for same global state.
+ * I am being a little bit lazy here
+ */
+export const GlobalContext = React.createContext({
+  scene: Scenes.MENU,
+  setScene: (newScene: Scenes) => {}
+})

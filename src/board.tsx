@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 
 import { DEFAULT_TABLE, PLAYERS } from "./constants";
@@ -7,9 +7,12 @@ export default function Board(props: any) {
   const [gameMoves, setGameMoves] = useState(DEFAULT_TABLE());
   const [turn, setTurn] = useState(PLAYERS.PLAYER1);
 
+  // -1, -1 indicates no move restriction
+  const [moveRestriction, setMoveRestriction] = useState([-1, -1]);
+
   const PlayerToSymbol = (Player: PLAYERS) => {
     if (Player === PLAYERS.NONE) {
-      return "-";
+      return "";
     }
     if (Player === PLAYERS.PLAYER1) {
       return "X";
@@ -19,36 +22,48 @@ export default function Board(props: any) {
     }
   };
 
-  const onMove = (location: any) => {
-
-    // TODO Determine if move is valid 
-
-    // Move the player
-    let gameBoard = gameMoves;
-
-    gameBoard[location[0]][location[1]][location[2]][location[3]] = turn;
-
-    setGameMoves(gameBoard);
-    if(turn === PLAYERS.PLAYER1){
-        setTurn(PLAYERS.PLAYER2)
-    }else{
-        setTurn(PLAYERS.PLAYER1)
-
-    }
-
-
-    // TODO Check if there is a winner
-
-  }
-
   const Cell = (props: any) => {
     let board = props.location[0] * 3 + props.location[1];
     let cell = props.location[2] * 3 + props.location[3];
 
+    const onMove = (location: any) => {
+      // TODO Determine if move is valid
+
+      // Is there already move in this cell
+      if (
+        gameMoves[location[0]][location[1]][location[2]][location[3]] !=
+        PLAYERS.NONE
+      ) {
+
+        return;
+      }
+
+      // Was this board valid based on the precding cell restructuons?
+
+      setTurn(turn)
+
+      // Move the player
+      let gameBoard = gameMoves;
+      gameBoard[location[0]][location[1]][location[2]][location[3]] = turn;
+      setGameMoves(gameBoard);
+
+      if (turn === PLAYERS.PLAYER1) {
+        setTurn(PLAYERS.PLAYER2);
+      } else {
+        setTurn(PLAYERS.PLAYER1);
+      }
+
+    //   console.log(gameMoves);
+
+      // TODO Check if there is a winner
+    };
+
     return (
-      <Pressable onPressIn={() => {
-        onMove(props.location)
-      }}>
+      <Pressable
+        onPressIn={() => {
+          onMove(props.location);
+        }}
+      >
         <View style={styles.miniItem}>
           <Text style={styles.label}>
             {PlayerToSymbol(
@@ -134,8 +149,8 @@ const styles = StyleSheet.create({
   },
   label: {
     textAlign: "center",
-    // fontSize: 25,
-    fontSize: 15,
+    fontSize: 25,
+    // fontSize: 15,
   },
   btn: {
     padding: 20,
