@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Scenes, GlobalContext } from "./src/constants";
@@ -10,7 +10,7 @@ export default function App() {
   /**
    * Init the context for the scene
    */
-  const [scene, setScene] = useState(Scenes.MENU);
+  const [scene, setScene] = useState(Scenes.GAME);
 
   return (
     <View style={styles.container}>

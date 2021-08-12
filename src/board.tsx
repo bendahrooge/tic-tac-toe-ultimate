@@ -3,6 +3,42 @@ import { StyleSheet, Text, View, Pressable } from "react-native";
 
 import { DEFAULT_TABLE, PLAYERS } from "./constants";
 
+/**
+ * Calls the matchHandler if any of the targets match the source
+ * @param source The cell number of the current cell
+ * @param targets The cell number targets
+ * @param matchHandler The function that will be called on match
+ */
+const matchesAny = (source: any, targets: any[], matchHandler: () => void) => {
+  targets.forEach((element: any) => {
+    if (source === element) {
+      matchHandler();
+    }
+  });
+};
+
+const CellBorders = (sequence: number) => {
+  let cellStyles: any[] = [];
+
+  matchesAny(sequence, [0, 1, 2], () => {
+    cellStyles.push(styles.noBorderTop);
+  });
+
+  matchesAny(sequence, [0, 3, 6], () => {
+    cellStyles.push(styles.noBorderLeft);
+  });
+
+  matchesAny(sequence, [2, 5, 8], () => {
+    cellStyles.push(styles.noBorderRight);
+  });
+
+  matchesAny(sequence, [6, 7, 8], () => {
+    cellStyles.push(styles.noBorderBottom);
+  });
+
+  return cellStyles;
+};
+
 export default function Board(props: any) {
   const [gameMoves, setGameMoves] = useState(DEFAULT_TABLE());
   const [turn, setTurn] = useState(PLAYERS.PLAYER1);
@@ -34,13 +70,12 @@ export default function Board(props: any) {
         gameMoves[location[0]][location[1]][location[2]][location[3]] !=
         PLAYERS.NONE
       ) {
-
         return;
       }
 
       // Was this board valid based on the precding cell restructuons?
 
-      setTurn(turn)
+      setTurn(turn);
 
       // Move the player
       let gameBoard = gameMoves;
@@ -53,7 +88,7 @@ export default function Board(props: any) {
         setTurn(PLAYERS.PLAYER1);
       }
 
-    //   console.log(gameMoves);
+      //   console.log(gameMoves);
 
       // TODO Check if there is a winner
     };
@@ -64,14 +99,15 @@ export default function Board(props: any) {
           onMove(props.location);
         }}
       >
-        <View style={styles.miniItem}>
+        <View style={[styles.miniItem, ...CellBorders(cell)]}>
           <Text style={styles.label}>
             {PlayerToSymbol(
               gameMoves[props.location[0]][props.location[1]][
                 props.location[2]
               ][props.location[3]]
             )}
-            {/* B{board} C{cell} */}
+            B{board} 
+            {/* C{cell} */}
             {/* B{props.location[0]},{props.location[1]} */}
             {/* C{props.location[2]},{props.location[3]} */}
           </Text>
@@ -89,9 +125,8 @@ export default function Board(props: any) {
   );
 
   const InnerBoard = (props: any) => (
-    <View style={styles.item}>
-      {/* <Text>{props.location[1]}</Text> */}
-
+    <View style={[styles.item, ...CellBorders(props.location[0] * 3 + props.location[1])]}>
+      {/* <Text>{props.location[0] * 3 + props.location[1]}</Text> */}
       <InnerRow location={[...props.location, 0]} />
       <InnerRow location={[...props.location, 1]} />
       <InnerRow location={[...props.location, 2]} />
@@ -144,13 +179,14 @@ const styles = StyleSheet.create({
     width: 35,
     backgroundColor: "#ddd",
     // margin: 5,
+    cursor: "pointer",
     borderWidth: 2,
     borderColor: "green",
   },
   label: {
     textAlign: "center",
-    fontSize: 25,
-    // fontSize: 15,
+    // fontSize: 25,
+    fontSize: 15,
   },
   btn: {
     padding: 20,
@@ -163,5 +199,17 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: "white",
     textAlign: "center",
+  },
+  noBorderLeft: {
+    borderLeftWidth: 0,
+  },
+  noBorderRight: {
+    borderRightWidth: 0,
+  },
+  noBorderTop: {
+    borderTopWidth: 0,
+  },
+  noBorderBottom: {
+    borderBottomWidth: 0,
   },
 });
