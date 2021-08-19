@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 
@@ -42,61 +42,100 @@ const CellBorders = (sequence: number) => {
 };
 
 export default function Board(props: any) {
-  // const [gameMoves, setGameMoves] = useState(DEFAULT_TABLE());
-  // const [closedBoards, setClosedBoards] = useState(new Array(8));
-  // const [turn, setTurn] = useState(PLAYERS.PLAYER1);
+  const [gameStack, setGameStack] = useState([new GameState()]);
+  // const [gameState, setGameState] = useState(new GameState)
 
-  const [gameStack, setGameStack] = useState()
-
-  // -1, indicates no move restriction (otherwise Board #1)
-  const [moveRestriction, setMoveRestriction] = useState(-1);
-
-  const PlayerToSymbol = (Player: PLAYERS) => {
-    if (Player === PLAYERS.NONE) {
-      return "";
-    }
-    if (Player === PLAYERS.PLAYER1) {
-      return "X";
-    }
-    if (Player === PLAYERS.PLAYER2) {
-      return "O";
-    }
-  };
+  // const PlayerToSymbol = (Player: PLAYERS) => {
+  //   if (Player === PLAYERS.NONE) {
+  //     return "";
+  //   }
+  //   if (Player === PLAYERS.PLAYER1) {
+  //     return "X";
+  //   }
+  //   if (Player === PLAYERS.PLAYER2) {
+  //     return "O";
+  //   }
+  // };
 
   const Cell = (props: any) => {
     let board = props.location[0] * 3 + props.location[1];
     let cell = props.location[2] * 3 + props.location[3];
 
     const onMove = (location: any) => {
-      // TODO Determine if move is valid
+      // let mostRecentMoveState = gameStack[gameStack.length - 1];
+
+      // Determine if move is valid
 
       // Is there already move in this cell
       if (
-        gameMoves[location[0]][location[1]][location[2]][location[3]] !=
-        PLAYERS.NONE
+        gameStack[gameStack.length - 1].board[location[0]][location[1]][location[2]][
+          location[3]
+        ] != PLAYERS.NONE
       ) {
         return;
       }
 
+      // @TODO
       // Was this board valid based on the precding cell restructuons?
+      if (false) {
+        return;
+      }
 
-      setTurn(turn);
+      // Create a new instance to store this's moves game information
+      // let thisMove = new GameState();
+      // console.log(thisMove);
+      let thisMove = Object.assign(Object.create(Object.getPrototypeOf(gameStack[gameStack.length - 1])), gameStack[gameStack.length - 1])
+
+      // Copy existing moves and closed boards
+      // thisMove.board = Object.assign([], gameStack[gameStack.length - 1]);
+
+      // thisMove.board = Array.from(gameStack[gameStack.length - 1].board)
+
+      // console.log(mostRecentMoveState.board)
+      console.log(gameStack)
+
+      // mostRecentMoveState.board.forEach((row, index) => {
+      //   row.forEach((cell, entry) => {
+      //     // thisMove.board[index][entry] = cell
+      //     if(cell === PLAYERS.PLAYER1){
+
+      //     }
+      //   });
+      // });
+
+      for(let x = 0; x < 3; x++){
+        for(let y = 0; y < 3; y++){
+          // thisMove.board[x][y] = mostRecentMoveState.board[x][y]
+          // if(mostRecentMoveState.board[x][y] === PLAYERS.PLAYER1){
+
+          // }
+          // thisMove.board[x][y] = Object.assign({}, mostRecentMoveState.board[x][y])
+        }
+      }
+
+
+
+      // Object.assign([], mostRecentMoveState.closedBoards);
+      // thisMove.board = mostRecentMoveState.board;
+      // thisMove.closedBoards = mostRecentMoveState.closedBoards;
+
+      // Used before to force a DOM update?
+      // setTurn(turn);
 
       // Move the player
-      let gameBoard = gameMoves;
-      gameBoard[location[0]][location[1]][location[2]][location[3]] = turn;
-      setGameMoves(gameBoard);
+      thisMove.board[location[0]][location[1]][location[2]][location[3]] =
+      gameStack[gameStack.length - 1].nextTurn;
 
       // @TODO set restriction for next player if there is one
 
-      // Flip the turn to the other player
-      if (turn === PLAYERS.PLAYER1) {
-        setTurn(PLAYERS.PLAYER2);
-      } else {
-        setTurn(PLAYERS.PLAYER1);
+      // Flip the turn to the other player if it will be player 2's move
+      // The next player is player1 by default (see class consturctor)
+      if (gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1) {
+        thisMove.nextTurn = PLAYERS.PLAYER2;
       }
 
-      //   console.log(gameMoves);
+      // Push the end of the stack
+      setGameStack([...gameStack, thisMove]);
 
       // TODO Check if there is a winner
     };
@@ -108,17 +147,25 @@ export default function Board(props: any) {
         }}
       >
         <View style={[styles.miniItem, ...CellBorders(cell)]}>
-          <Text style={styles.label}>
-            {PlayerToSymbol(
-              gameMoves[props.location[0]][props.location[1]][
+          {/* <Text style={styles.label}> */}
+          {/* {Pla(
+              gameStack[gameStack.length - 1].board[props.location[0]][props.location[1]][
                 props.location[2]
               ][props.location[3]]
-            )}
-            {/* B{board} */}
-            {/* C{cell} */}
-            {/* B{props.location[0]},{props.location[1]} */}
-            {/* C{props.location[2]},{props.location[3]} */}
-          </Text>
+            )} */}
+          <PlayerLabel
+            // data={
+            //   props.gameState.board[props.location[0]][props.location[1]][
+            //     props.location[2]
+            //   ][props.location[3]]
+            // }
+            data={props.data}
+          />
+          {/* B{board} */}
+          {/* C{cell} */}
+          {/* B{props.location[0]},{props.location[1]} */}
+          {/* C{props.location[2]},{props.location[3]} */}
+          {/* </Text> */}
         </View>
       </Pressable>
     );
@@ -126,9 +173,33 @@ export default function Board(props: any) {
 
   const InnerRow = (props: any) => (
     <View style={[styles.miniRow]}>
-      <Cell location={[...props.location, 0]} />
-      <Cell location={[...props.location, 1]} />
-      <Cell location={[...props.location, 2]} />
+      <Cell
+        location={[...props.location, 0]}
+        data={
+          gameStack[gameStack.length - 1].board[props.location[0]][
+            props.location[1]
+          ][props.location[2]][0]
+        }
+        gameState={gameStack[gameStack.length - 1]}
+      />
+      <Cell
+        location={[...props.location, 1]}
+        data={
+          gameStack[gameStack.length - 1].board[props.location[0]][
+            props.location[1]
+          ][props.location[2]][1]
+        }
+        gameState={gameStack[gameStack.length - 1]}
+      />
+      <Cell
+        location={[...props.location, 2]}
+        data={
+          gameStack[gameStack.length - 1].board[props.location[0]][
+            props.location[1]
+          ][props.location[2]][2]
+        }
+        gameState={gameStack[gameStack.length - 1]}
+      />
     </View>
   );
 
@@ -164,18 +235,34 @@ export default function Board(props: any) {
       <View>
         <PlayerIndicator
           playerName="Player 1"
-          active={turn === PLAYERS.PLAYER1}
+          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1}
           color={COLORS[0]}
         />
         <PlayerIndicator
           playerName="Player 2"
-          active={turn === PLAYERS.PLAYER2}
+          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER2}
           color={COLORS[1]}
         />
       </View>
       <Row location={[0]} />
       <Row location={[1]} />
       <Row location={[2]} />
+      <View>
+        <Pressable
+          onPress={() => {
+            console.log(gameStack);
+            // // let newStack = gameStack.slice(0, -2)
+            console.log([...gameStack, gameStack[gameStack.length - 2]]);
+            // console.log(newStack.length)
+
+            console.log(DEFAULT_TABLE())
+
+            setGameStack([...gameStack, gameStack[gameStack.length - 2]]);
+          }}
+        >
+          <Text>Undo</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -215,11 +302,6 @@ const styles = StyleSheet.create({
     // cursor: "pointer",
     borderWidth: 2,
     borderColor: "grey",
-  },
-  label: {
-    textAlign: "center",
-    fontSize: 25,
-    // fontSize: 15,
   },
   btn: {
     padding: 20,

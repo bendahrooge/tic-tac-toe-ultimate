@@ -7,12 +7,12 @@ import { PLAYERS } from "./constants";
  * in the indicator (e.g., X, O, colored square)
  * @param props
  */
-export const PlayerLabel = (Player: PLAYERS) => {
+export const PlayerLabel = (props: any) => {
   
   return (
     <View>
-      {Player === PLAYERS.PLAYER1 && <Text>X</Text>}
-      {Player === PLAYERS.PLAYER2 && <Text>O</Text>}
+      {props.data === PLAYERS.PLAYER1 && <Text style={labelStyles.label}>X</Text>}
+      {props.data === PLAYERS.PLAYER2 && <Text style={labelStyles.label}>O</Text>}
     </View>
   )
 
@@ -63,3 +63,13 @@ const styles = StyleSheet.create({
     padding: 10,
   }
 });
+
+const labelStyles = StyleSheet.create({
+  label: {
+    textAlign: "center",
+    fontSize: 25,
+    // fontSize: 15,
+  },
+});
+
+

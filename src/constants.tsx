@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 export enum Scenes {
   /**
@@ -22,10 +22,10 @@ export enum PLAYERS {
   TIE,
 }
 
-export const COLORS = [
-  "#EA3556",
-  "#61D2D6"
-]
+/**
+ * Default theme colors for each player
+ */
+export const COLORS = ["#EA3556", "#61D2D6"];
 
 /**
  * The default state where no moves have been made by either party
@@ -49,19 +49,34 @@ export const DEFAULT_TABLE = () => [
 ];
 
 /**
- * Represents the game at a state in time. 
+ * Represents the game at a state in time.
  * Storing the game state this way allows each move to be stored as a new entry in the array,
- * and easily revert/undo a move, at the expense of increated memory usage. 
+ * and easily revert/undo a move, at the expense of increated memory usage.
+ *
+ * A gooder programmer would have written this in more OOP, with getter or setter, this is a @TODO
  */
 export class GameState {
-  board: PLAYERS[][];
+  board: PLAYERS[][][][];
   closedBoards: PLAYERS[];
   nextTurn: PLAYERS;
-  constructor(){
-    this.board = DEFAULT_BOARD();
+
+  // -1, indicates no move restriction (otherwise Board #1)
+  nextMoveRestriction: number;
+  constructor() {
+    this.board = DEFAULT_TABLE();
     this.closedBoards = new Array(8);
     this.nextTurn = PLAYERS.PLAYER1;
+    this.nextMoveRestriction = -1;
   }
+}
+
+export const Game = {
+  board: DEFAULT_TABLE(),
+  closedBoards: new Array(8),
+  nextTurn: PLAYERS.PLAYER1,
+
+  // -1, indicates no move restriction (otherwise Board #1)
+  nextMoveRestriction: -1,
 }
 
 /**
@@ -70,5 +85,6 @@ export class GameState {
  */
 export const GlobalContext = React.createContext({
   scene: Scenes.MENU,
-  setScene: (newScene: Scenes) => {}
-})
+  setScene: (newScene: Scenes) => {},
+
+});
