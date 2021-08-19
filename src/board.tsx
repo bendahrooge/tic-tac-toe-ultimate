@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
-import { DEFAULT_TABLE, PLAYERS } from "./constants";
+import { DEFAULT_TABLE, PLAYERS, COLORS, GameState } from "./constants";
+import { PlayerIndicator, PlayerLabel } from "./Player";
 
 /**
  * Calls the matchHandler if any of the targets match the source
@@ -40,11 +42,14 @@ const CellBorders = (sequence: number) => {
 };
 
 export default function Board(props: any) {
-  const [gameMoves, setGameMoves] = useState(DEFAULT_TABLE());
-  const [turn, setTurn] = useState(PLAYERS.PLAYER1);
+  // const [gameMoves, setGameMoves] = useState(DEFAULT_TABLE());
+  // const [closedBoards, setClosedBoards] = useState(new Array(8));
+  // const [turn, setTurn] = useState(PLAYERS.PLAYER1);
 
-  // -1, -1 indicates no move restriction
-  const [moveRestriction, setMoveRestriction] = useState([-1, -1]);
+  const [gameStack, setGameStack] = useState()
+
+  // -1, indicates no move restriction (otherwise Board #1)
+  const [moveRestriction, setMoveRestriction] = useState(-1);
 
   const PlayerToSymbol = (Player: PLAYERS) => {
     if (Player === PLAYERS.NONE) {
@@ -82,6 +87,9 @@ export default function Board(props: any) {
       gameBoard[location[0]][location[1]][location[2]][location[3]] = turn;
       setGameMoves(gameBoard);
 
+      // @TODO set restriction for next player if there is one
+
+      // Flip the turn to the other player
       if (turn === PLAYERS.PLAYER1) {
         setTurn(PLAYERS.PLAYER2);
       } else {
@@ -106,7 +114,7 @@ export default function Board(props: any) {
                 props.location[2]
               ][props.location[3]]
             )}
-            B{board} 
+            {/* B{board} */}
             {/* C{cell} */}
             {/* B{props.location[0]},{props.location[1]} */}
             {/* C{props.location[2]},{props.location[3]} */}
@@ -125,7 +133,12 @@ export default function Board(props: any) {
   );
 
   const InnerBoard = (props: any) => (
-    <View style={[styles.item, ...CellBorders(props.location[0] * 3 + props.location[1])]}>
+    <View
+      style={[
+        styles.item,
+        ...CellBorders(props.location[0] * 3 + props.location[1]),
+      ]}
+    >
       {/* <Text>{props.location[0] * 3 + props.location[1]}</Text> */}
       <InnerRow location={[...props.location, 0]} />
       <InnerRow location={[...props.location, 1]} />
@@ -147,6 +160,19 @@ export default function Board(props: any) {
    */
   return (
     <View style={styles.container}>
+      <View>{/* <Text style={styles.logo}>---Logo goes here---</Text> */}</View>
+      <View>
+        <PlayerIndicator
+          playerName="Player 1"
+          active={turn === PLAYERS.PLAYER1}
+          color={COLORS[0]}
+        />
+        <PlayerIndicator
+          playerName="Player 2"
+          active={turn === PLAYERS.PLAYER2}
+          color={COLORS[1]}
+        />
+      </View>
       <Row location={[0]} />
       <Row location={[1]} />
       <Row location={[2]} />
@@ -155,6 +181,12 @@ export default function Board(props: any) {
 }
 
 const styles = StyleSheet.create({
+  logo: {
+    height: 70,
+    width: 325,
+    textAlign: "center",
+    // padding: 25
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -170,8 +202,8 @@ const styles = StyleSheet.create({
   },
   item: {
     backgroundColor: "#ddd",
-    margin: 0,
-    borderWidth: 2,
+    // margin: 5,
+    borderWidth: 5,
     // borderColor: "red",
   },
   miniItem: {
@@ -179,14 +211,15 @@ const styles = StyleSheet.create({
     width: 35,
     backgroundColor: "#ddd",
     // margin: 5,
-    cursor: "pointer",
+    // padding: 5,
+    // cursor: "pointer",
     borderWidth: 2,
-    borderColor: "green",
+    borderColor: "grey",
   },
   label: {
     textAlign: "center",
-    // fontSize: 25,
-    fontSize: 15,
+    fontSize: 25,
+    // fontSize: 15,
   },
   btn: {
     padding: 20,

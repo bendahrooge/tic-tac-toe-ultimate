@@ -16,11 +16,16 @@ export enum Scenes {
  * Identifer for each player, as well as the tie and no move cases
  */
 export enum PLAYERS {
-  NONE,
   PLAYER1,
   PLAYER2,
+  NONE,
   TIE,
 }
+
+export const COLORS = [
+  "#EA3556",
+  "#61D2D6"
+]
 
 /**
  * The default state where no moves have been made by either party
@@ -42,6 +47,22 @@ export const DEFAULT_TABLE = () => [
   [DEFAULT_BOARD(), DEFAULT_BOARD(), DEFAULT_BOARD()],
   [DEFAULT_BOARD(), DEFAULT_BOARD(), DEFAULT_BOARD()],
 ];
+
+/**
+ * Represents the game at a state in time. 
+ * Storing the game state this way allows each move to be stored as a new entry in the array,
+ * and easily revert/undo a move, at the expense of increated memory usage. 
+ */
+export class GameState {
+  board: PLAYERS[][];
+  closedBoards: PLAYERS[];
+  nextTurn: PLAYERS;
+  constructor(){
+    this.board = DEFAULT_BOARD();
+    this.closedBoards = new Array(8);
+    this.nextTurn = PLAYERS.PLAYER1;
+  }
+}
 
 /**
  * Context object for same global state.
