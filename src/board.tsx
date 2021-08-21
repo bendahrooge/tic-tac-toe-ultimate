@@ -4,7 +4,11 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 
 import { DEFAULT_TABLE, PLAYERS, COLORS, GameState } from "./constants";
 import { PlayerIndicator, PlayerLabel } from "./Player";
-import { BoardHasPossibleMoves, DetermineBoardWinner } from "./logic";
+import {
+  BoardHasPossibleMoves,
+  DetermineBoardWinner,
+  DetermineGameWiner,
+} from "./logic";
 
 /**
  * Calls the matchHandler if any of the targets match the source
@@ -57,6 +61,11 @@ export default function Board(props: any) {
         },${location[3]}`
       );
 
+      // Handle case if player moved after game winner already determined
+      if (gameStack[gameStack.length - 1].winner != PLAYERS.NONE) {
+        return;
+      }
+
       // Determine if move is valid
 
       // Is there already move in this cell
@@ -68,7 +77,6 @@ export default function Board(props: any) {
         return;
       }
 
-      // @TODO
       // Was this board valid based on the precding cell restructuons?
       if (gameStack[gameStack.length - 1].nextMoveRestriction != -1) {
         if (
@@ -109,16 +117,13 @@ export default function Board(props: any) {
           if (DetermineBoardWinner(board) != PLAYERS.NONE) {
             // Consider this a closed board
             thisMove.closedBoards[boardNumber] = DetermineBoardWinner(board);
-
-            // Consider preventing the undo button in this case since a win more was likely intentional
-            setUndoAllow(false);
           }
 
           boardNumber++;
         });
       });
 
-      // @TODO set restriction for next player if there is one
+      // Set restriction for next player if there is one
 
       // If the board is not closed AND there are moves avaiable in the target board, then
       // sent the move restriction to the target board
@@ -139,10 +144,11 @@ export default function Board(props: any) {
         thisMove.nextTurn = PLAYERS.PLAYER2;
       }
 
-      // Push the end of the stack
-      setGameStack([...gameStack, thisMove]);
+      // Check if there is a winner using the closed boards data entrh
+      thisMove.winner = DetermineGameWiner(thisMove.closedBoards);
 
-      // TODO Check if there is a winner
+      // Push the current state to the end of the stack
+      setGameStack([...gameStack, thisMove]);
     };
 
     let thisCellHighlighted =
@@ -150,8 +156,7 @@ export default function Board(props: any) {
       (gameStack[gameStack.length - 1].nextMoveRestriction ===
         props.location[0] * 3 + props.location[1] ||
         gameStack[gameStack.length - 1].nextMoveRestriction === -1) &&
-
-      // Make sure that they cell is not already occupied 
+      // Make sure that they cell is not already occupied
       props.data === PLAYERS.NONE;
 
     return (
@@ -224,24 +229,65 @@ export default function Board(props: any) {
     </View>
   );
 
-  const InnerBoard = (props: any) => (
-    <View
-      style={[
-        styles.item,
-
-        // Sets the borders based on this subboard's location
-        ...CellBorders(props.location[0] * 3 + props.location[1]),
-      ]}
-    >
-      {/* <Text>{props.location[0] * 3 + props.location[1]}</Text> */}
-      {gameStack[gameStack.length - 1].closedBoards[
+  const InnerBoard = (props: any) => {
+    /**
+     * Board win state
+     */
+    let boardWinner =
+      gameStack[gameStack.length - 1].closedBoards[
         props.location[0] * 3 + props.location[1]
-      ] != PLAYERS.NONE && <Text>Closed</Text>}
-      <InnerRow location={[...props.location, 0]} />
-      <InnerRow location={[...props.location, 1]} />
-      <InnerRow location={[...props.location, 2]} />
-    </View>
-  );
+      ];
+    if (boardWinner != PLAYERS.NONE) {
+      return (
+        <View
+          style={[
+            styles.item,
+            ...CellBorders(props.location[0] * 3 + props.location[1]),
+          ]}
+        >
+          {boardWinner === PLAYERS.PLAYER1 && (
+            <Text style={[styles.winBoard, styles.player1]}>X</Text>
+          )}
+          {boardWinner === PLAYERS.PLAYER2 && (
+            <Text style={[styles.winBoard, styles.player2]}>O</Text>
+          )}
+        </View>
+      );
+    }
+
+    /**
+     * Game is won state: Only show winning boards
+     */
+    if (gameStack[gameStack.length - 1].winner != PLAYERS.NONE && gameStack[gameStack.length - 1].winner != PLAYERS.TIE) {
+      return (
+        <View
+          style={[
+            styles.item,
+            ...CellBorders(props.location[0] * 3 + props.location[1]),
+          ]}
+        />
+      );
+    }
+
+    /**
+     * Board is not won
+     */
+    return (
+      <View
+        style={[
+          styles.item,
+
+          // Sets the borders based on this subboard's location
+          ...CellBorders(props.location[0] * 3 + props.location[1]),
+        ]}
+      >
+        {/* <Text>{props.location[0] * 3 + props.location[1]}</Text> */}
+        <InnerRow location={[...props.location, 0]} />
+        <InnerRow location={[...props.location, 1]} />
+        <InnerRow location={[...props.location, 2]} />
+      </View>
+    );
+  };
 
   const Row = (props: any) => (
     <View style={styles.row}>
@@ -258,18 +304,20 @@ export default function Board(props: any) {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.logo}>---Logo goes here---</Text>
+        {/* <Text style={styles.logo}>Ultimate Tic Tac Toe</Text> */}
       </View>
       <View>
         <PlayerIndicator
           playerName="Player X"
-          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1}
+          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1 && gameStack[gameStack.length - 1].winner != PLAYERS.PLAYER2}
           color={COLORS[0]}
+          winner={gameStack[gameStack.length - 1].winner === PLAYERS.PLAYER1}
         />
         <PlayerIndicator
           playerName="Player O"
-          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER2}
+          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER2 && gameStack[gameStack.length - 1].winner != PLAYERS.PLAYER1}
           color={COLORS[1]}
+          winner={gameStack[gameStack.length - 1].winner === PLAYERS.PLAYER2}
         />
       </View>
       <Row location={[0]} />
@@ -301,6 +349,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: 325,
     textAlign: "center",
+    fontFamily: "RampartOne-Regular"
     // padding: 25
   },
   container: {
@@ -359,6 +408,28 @@ const styles = StyleSheet.create({
   // Cell style when cell is allowed to be moved in
   mustMoveBoard: {
     backgroundColor: "#98ffcc", //#EBF30C // #F7B9DD
+  },
+  winBoard: {
+    fontSize: 85,
+    width: 105,
+    height: 105,
+    textAlign: "center",
+  },
+
+  // Background for player 1 win case
+  winBoardPlayer1: {
+    backgroundColor: "#2184DE",
+  },
+  winBoardPlayer2: {
+    backgroundColor: "#2184DE",
+  },
+
+  // Text color for player 1 win case
+  player1: {
+    color: COLORS[0],
+  },
+  player2: {
+    color: COLORS[1],
   },
 });
 

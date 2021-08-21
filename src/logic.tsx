@@ -44,7 +44,12 @@ export const DetermineBoardWinner = (subboard: PLAYERS[][]) => {
 
     // Diag 2
     if(subboard[0][2] != PLAYERS.NONE && subboard[0][2] === subboard[1][1] && subboard[0][2] === subboard[2][0]){
-        return subboard[0][0]
+        return subboard[0][2]
+    }
+
+    // Tie case 
+    if(!BoardHasPossibleMoves(subboard)){
+        return PLAYERS.TIE;
     }
 
     return PLAYERS.NONE
@@ -55,9 +60,23 @@ export const DetermineBoardWinner = (subboard: PLAYERS[][]) => {
  * @param currentBoard 
  * @returns PLAYER.NONE, 1, 2
  */
-export const DetermineGameWiner = (currentBoard: any) => [
+export const DetermineGameWiner = (currentBoard: any) => {
+    // Build 2D array out of closed boards
+    let board2D: any[][] = [];
+    for(var i = 0; i < 3; i++){
+        let row = [];
+        for(var j = 0; j < 3; j++){
+            row.push(currentBoard[i * 3 + j])
+        }
+        board2D.push(row);
+    }
 
-]
+
+    console.log(board2D)
+    console.log(`Game winner: ${DetermineBoardWinner(board2D)} `);
+
+    return DetermineBoardWinner(board2D);
+}
 
 export const DetermineIfMoveRestrictionsSastified = (
   currentBoard: any,

@@ -34,9 +34,19 @@ export const PlayerIndicator = (props: any) => {
 
   return (
     <View
-      style={[styles.default, props.active ? activePlayerStyle.active : null]}
+      style={[
+        styles.default,
+        props.active ? activePlayerStyle.active : null,
+        props.winner ? styles.winner : null,
+      ]}
     >
-      <Text style={[styles.text, !props.active ? styles.inactive : null]}>
+      <Text
+        style={[
+          styles.text,
+          !props.active ? styles.inactive : null,
+          props.winner ? styles.winner : null,
+        ]}
+      >
         {props.playerName || "Participant"}
       </Text>
     </View>
@@ -51,6 +61,7 @@ const styles = StyleSheet.create({
   // Gold background @TOOD: Trophy icon?
   winner: {
     backgroundColor: "#EDDE45",
+    color: "black",
   },
   // Default player indicator styles
   text: {

@@ -10,7 +10,7 @@ export default function App() {
   /**
    * Init the context for the scene
    */
-  const [scene, setScene] = useState(Scenes.GAME);
+  const [scene, setScene] = useState(Scenes.MENU);
 
   return (
     <View style={styles.container}>
@@ -28,7 +28,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#eee",
+    // backgroundColor: "#eee",
     width: "100%",
     height: "100%",
   },

@@ -60,13 +60,16 @@ export class GameState {
   closedBoards: PLAYERS[];
   nextTurn: PLAYERS;
 
-  // -1, indicates no move restriction (otherwise Board #1)
+  // -1, indicates no move restriction
   nextMoveRestriction: number;
+  winner: PLAYERS;
+
   constructor() {
     this.board = DEFAULT_TABLE();
     this.closedBoards = new Array(9).fill(PLAYERS.NONE);
     this.nextTurn = PLAYERS.PLAYER1;
     this.nextMoveRestriction = -1;
+    this.winner = PLAYERS.NONE
   }
 }
 
