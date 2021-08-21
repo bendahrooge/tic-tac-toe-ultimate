@@ -4,6 +4,7 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 
 import { DEFAULT_TABLE, PLAYERS, COLORS, GameState } from "./constants";
 import { PlayerIndicator, PlayerLabel } from "./Player";
+import { BoardHasPossibleMoves, DetermineBoardWinner } from "./logic";
 
 /**
  * Calls the matchHandler if any of the targets match the source
@@ -43,90 +44,94 @@ const CellBorders = (sequence: number) => {
 
 export default function Board(props: any) {
   const [gameStack, setGameStack] = useState([new GameState()]);
-  // const [gameState, setGameState] = useState(new GameState)
-
-  // const PlayerToSymbol = (Player: PLAYERS) => {
-  //   if (Player === PLAYERS.NONE) {
-  //     return "";
-  //   }
-  //   if (Player === PLAYERS.PLAYER1) {
-  //     return "X";
-  //   }
-  //   if (Player === PLAYERS.PLAYER2) {
-  //     return "O";
-  //   }
-  // };
+  const [undoAllow, setUndoAllow] = useState(false);
 
   const Cell = (props: any) => {
     let board = props.location[0] * 3 + props.location[1];
     let cell = props.location[2] * 3 + props.location[3];
 
     const onMove = (location: any) => {
-      // let mostRecentMoveState = gameStack[gameStack.length - 1];
+      console.log(
+        `The player moved into cell 1D ${location[2] * 3 + location[3]} or 2D ${
+          location[2]
+        },${location[3]}`
+      );
 
       // Determine if move is valid
 
       // Is there already move in this cell
       if (
-        gameStack[gameStack.length - 1].board[location[0]][location[1]][location[2]][
-          location[3]
-        ] != PLAYERS.NONE
+        gameStack[gameStack.length - 1].board[location[0]][location[1]][
+          location[2]
+        ][location[3]] != PLAYERS.NONE
       ) {
         return;
       }
 
       // @TODO
       // Was this board valid based on the precding cell restructuons?
-      if (false) {
-        return;
-      }
-
-      // Create a new instance to store this's moves game information
-      // let thisMove = new GameState();
-      // console.log(thisMove);
-      let thisMove = Object.assign(Object.create(Object.getPrototypeOf(gameStack[gameStack.length - 1])), gameStack[gameStack.length - 1])
-
-      // Copy existing moves and closed boards
-      // thisMove.board = Object.assign([], gameStack[gameStack.length - 1]);
-
-      // thisMove.board = Array.from(gameStack[gameStack.length - 1].board)
-
-      // console.log(mostRecentMoveState.board)
-      console.log(gameStack)
-
-      // mostRecentMoveState.board.forEach((row, index) => {
-      //   row.forEach((cell, entry) => {
-      //     // thisMove.board[index][entry] = cell
-      //     if(cell === PLAYERS.PLAYER1){
-
-      //     }
-      //   });
-      // });
-
-      for(let x = 0; x < 3; x++){
-        for(let y = 0; y < 3; y++){
-          // thisMove.board[x][y] = mostRecentMoveState.board[x][y]
-          // if(mostRecentMoveState.board[x][y] === PLAYERS.PLAYER1){
-
-          // }
-          // thisMove.board[x][y] = Object.assign({}, mostRecentMoveState.board[x][y])
+      if (gameStack[gameStack.length - 1].nextMoveRestriction != -1) {
+        if (
+          location[0] * 3 + location[1] !=
+          gameStack[gameStack.length - 1].nextMoveRestriction
+        ) {
+          // Display an error message to the user?
+          return;
         }
       }
 
+      // Create a new instance to store this's moves game information
+      let thisMove = new GameState();
 
+      // Copy existing moves and closed boards
+      // This JSON parsing is a tempoary fix to copying arrays immutably i swear (double nested arrays are hard)
+      // https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript
+      thisMove.board = JSON.parse(
+        JSON.stringify(gameStack[gameStack.length - 1].board)
+      );
 
-      // Object.assign([], mostRecentMoveState.closedBoards);
-      // thisMove.board = mostRecentMoveState.board;
-      // thisMove.closedBoards = mostRecentMoveState.closedBoards;
-
-      // Used before to force a DOM update?
-      // setTurn(turn);
+      thisMove.closedBoards = Object.assign(
+        [],
+        gameStack[gameStack.length - 1].closedBoards
+      );
 
       // Move the player
       thisMove.board[location[0]][location[1]][location[2]][location[3]] =
-      gameStack[gameStack.length - 1].nextTurn;
+        gameStack[gameStack.length - 1].nextTurn;
+
+      // Unlock undo more if it was locked
+      setUndoAllow(true);
+
+      // Determine if any board winner(s) and update closed boards
+      let boardNumber = 0;
+      thisMove.board.forEach((row) => {
+        row.forEach((board) => {
+          if (DetermineBoardWinner(board) != PLAYERS.NONE) {
+            // Consider this a closed board
+            thisMove.closedBoards[boardNumber] = DetermineBoardWinner(board);
+
+            // Consider preventing the undo button in this case since a win more was likely intentional
+            setUndoAllow(false);
+          }
+
+          boardNumber++;
+        });
+      });
 
       // @TODO set restriction for next player if there is one
+
+      // If the board is not closed AND there are moves avaiable in the target board, then
+      // sent the move restriction to the target board
+      if (
+        BoardHasPossibleMoves(thisMove.board[location[2]][location[3]]) &&
+        thisMove.closedBoards[location[2] * 3 + location[3]] === PLAYERS.NONE
+      ) {
+        // The next move must go in this specific square
+        thisMove.nextMoveRestriction = location[2] * 3 + location[3];
+        console.log(
+          `Set a move restriction for ${location[2] * 3 + location[3]}`
+        );
+      }
 
       // Flip the turn to the other player if it will be player 2's move
       // The next player is player1 by default (see class consturctor)
@@ -140,13 +145,29 @@ export default function Board(props: any) {
       // TODO Check if there is a winner
     };
 
+    let thisCellHighlighted =
+      // Check if move retriction is defined, or -1 for open move
+      (gameStack[gameStack.length - 1].nextMoveRestriction ===
+        props.location[0] * 3 + props.location[1] ||
+        gameStack[gameStack.length - 1].nextMoveRestriction === -1) &&
+
+      // Make sure that they cell is not already occupied 
+      props.data === PLAYERS.NONE;
+
     return (
       <Pressable
         onPressIn={() => {
           onMove(props.location);
         }}
       >
-        <View style={[styles.miniItem, ...CellBorders(cell)]}>
+        <View
+          style={[
+            styles.miniItem,
+            ...CellBorders(cell),
+            // Sets a background color indicator for move restrictions
+            thisCellHighlighted ? styles.mustMoveBoard : null,
+          ]}
+        >
           {/* <Text style={styles.label}> */}
           {/* {Pla(
               gameStack[gameStack.length - 1].board[props.location[0]][props.location[1]][
@@ -207,10 +228,15 @@ export default function Board(props: any) {
     <View
       style={[
         styles.item,
+
+        // Sets the borders based on this subboard's location
         ...CellBorders(props.location[0] * 3 + props.location[1]),
       ]}
     >
       {/* <Text>{props.location[0] * 3 + props.location[1]}</Text> */}
+      {gameStack[gameStack.length - 1].closedBoards[
+        props.location[0] * 3 + props.location[1]
+      ] != PLAYERS.NONE && <Text>Closed</Text>}
       <InnerRow location={[...props.location, 0]} />
       <InnerRow location={[...props.location, 1]} />
       <InnerRow location={[...props.location, 2]} />
@@ -231,15 +257,17 @@ export default function Board(props: any) {
    */
   return (
     <View style={styles.container}>
-      <View>{/* <Text style={styles.logo}>---Logo goes here---</Text> */}</View>
+      <View>
+        <Text style={styles.logo}>---Logo goes here---</Text>
+      </View>
       <View>
         <PlayerIndicator
-          playerName="Player 1"
+          playerName="Player X"
           active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1}
           color={COLORS[0]}
         />
         <PlayerIndicator
-          playerName="Player 2"
+          playerName="Player O"
           active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER2}
           color={COLORS[1]}
         />
@@ -247,17 +275,18 @@ export default function Board(props: any) {
       <Row location={[0]} />
       <Row location={[1]} />
       <Row location={[2]} />
-      <View>
+      <View
+        style={[
+          undoBtnStyles.default,
+          !undoAllow ? undoBtnStyles.disabled : null,
+        ]}
+      >
         <Pressable
           onPress={() => {
-            console.log(gameStack);
-            // // let newStack = gameStack.slice(0, -2)
-            console.log([...gameStack, gameStack[gameStack.length - 2]]);
-            // console.log(newStack.length)
-
-            console.log(DEFAULT_TABLE())
-
-            setGameStack([...gameStack, gameStack[gameStack.length - 2]]);
+            if (undoAllow) {
+              setGameStack([...gameStack, gameStack[gameStack.length - 2]]);
+              setUndoAllow(false);
+            }
           }}
         >
           <Text>Undo</Text>
@@ -269,7 +298,7 @@ export default function Board(props: any) {
 
 const styles = StyleSheet.create({
   logo: {
-    height: 70,
+    height: 50,
     width: 325,
     textAlign: "center",
     // padding: 25
@@ -301,7 +330,7 @@ const styles = StyleSheet.create({
     // padding: 5,
     // cursor: "pointer",
     borderWidth: 2,
-    borderColor: "grey",
+    borderColor: "#75848A",
   },
   btn: {
     padding: 20,
@@ -326,5 +355,21 @@ const styles = StyleSheet.create({
   },
   noBorderBottom: {
     borderBottomWidth: 0,
+  },
+  // Cell style when cell is allowed to be moved in
+  mustMoveBoard: {
+    backgroundColor: "#98ffcc", //#EBF30C // #F7B9DD
+  },
+});
+
+const undoBtnStyles = StyleSheet.create({
+  default: {
+    backgroundColor: "dodgerblue",
+    borderRadius: 5,
+    marginTop: 10,
+    padding: 10,
+  },
+  disabled: {
+    backgroundColor: "gray",
   },
 });

@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { PLAYERS } from "./constants";
+import { PLAYERS, COLORS } from "./constants";
 
 /**
  * Shows the label for the player on the board or
@@ -8,14 +8,16 @@ import { PLAYERS } from "./constants";
  * @param props
  */
 export const PlayerLabel = (props: any) => {
-  
   return (
     <View>
-      {props.data === PLAYERS.PLAYER1 && <Text style={labelStyles.label}>X</Text>}
-      {props.data === PLAYERS.PLAYER2 && <Text style={labelStyles.label}>O</Text>}
+      {props.data === PLAYERS.PLAYER1 && (
+        <Text style={[labelStyles.label, labelStyles.player1]}>X</Text>
+      )}
+      {props.data === PLAYERS.PLAYER2 && (
+        <Text style={[labelStyles.label, labelStyles.player2]}>O</Text>
+      )}
     </View>
-  )
-
+  );
 };
 
 /**
@@ -24,15 +26,16 @@ export const PlayerLabel = (props: any) => {
  * @returns
  */
 export const PlayerIndicator = (props: any) => {
-
   const activePlayerStyle = StyleSheet.create({
     active: {
-      backgroundColor: props.color
-    }
-  })
+      backgroundColor: props.color,
+    },
+  });
 
   return (
-    <View style={[styles.default, props.active ? activePlayerStyle.active : null]}>
+    <View
+      style={[styles.default, props.active ? activePlayerStyle.active : null]}
+    >
       <Text style={[styles.text, !props.active ? styles.inactive : null]}>
         {props.playerName || "Participant"}
       </Text>
@@ -43,11 +46,11 @@ export const PlayerIndicator = (props: any) => {
 const styles = StyleSheet.create({
   // Style used if player indicator is inactive (greyed out text)
   inactive: {
-    color: "#C4BBC2"
+    color: "#C4BBC2",
   },
   // Gold background @TOOD: Trophy icon?
   winner: {
-    backgroundColor: "#EDDE45"
+    backgroundColor: "#EDDE45",
   },
   // Default player indicator styles
   text: {
@@ -61,15 +64,20 @@ const styles = StyleSheet.create({
     width: 335,
     // borderRadius: 25,
     padding: 10,
-  }
+  },
 });
 
 const labelStyles = StyleSheet.create({
   label: {
     textAlign: "center",
     fontSize: 25,
+    fontWeight: "bold",
     // fontSize: 15,
   },
+  player1: {
+    color: COLORS[0],
+  },
+  player2: {
+    color: COLORS[1],
+  },
 });
-
-

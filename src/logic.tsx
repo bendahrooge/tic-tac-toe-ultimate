@@ -4,10 +4,12 @@ import { PLAYERS } from "./constants";
  * Determines if a sub-board has possible moves, therefore if it is a valid restriction
  * @param subBoard 
  */
-export const BoardHasPossibleMoves = (subBoard: []) => {
+export const BoardHasPossibleMoves = (subBoard: any) => {
     for(var i = 0; i < subBoard.length; i++){
-        if(subBoard[i] === PLAYERS.NONE){
-            return true;
+        for(var x = 0; x < subBoard[i].length; x++){
+            if(subBoard[i][x] === PLAYERS.NONE){
+                return true;
+            }
         }
     }
 
@@ -15,15 +17,37 @@ export const BoardHasPossibleMoves = (subBoard: []) => {
 }
 
 /**
- * 
+ * Determines if a subboard contains a winner
  * @param subboard 
- * @returns PLAYER.NONE, 1, 2
+ * @returns PLAYERS.NONE, 1, 2
  */
-export const DetermineBoardWinner = (subboard: []) => {
+export const DetermineBoardWinner = (subboard: PLAYERS[][]) => {
+    
     // Hori
+    for(var i = 0; i < 3; i++){
+        if(subboard[i][0] != PLAYERS.NONE && subboard[i][0] === subboard[i][1] && subboard[i][0] === subboard[i][2]){
+            return subboard[i][0];
+        }
+    }
+
     // Vert
+    for(var i = 0; i < 3; i++){
+        if(subboard[0][i] != PLAYERS.NONE && subboard[0][i] === subboard[1][i] && subboard[0][i] === subboard[2][i]){
+            return subboard[0][i];
+        }
+    }
+
     // Diag 1 
+    if(subboard[0][0] != PLAYERS.NONE && subboard[0][0] === subboard[1][1] && subboard[0][0] === subboard[2][2]){
+        return subboard[0][0]
+    }
+
     // Diag 2
+    if(subboard[0][2] != PLAYERS.NONE && subboard[0][2] === subboard[1][1] && subboard[0][2] === subboard[2][0]){
+        return subboard[0][0]
+    }
+
+    return PLAYERS.NONE
 }
 
 /**
