@@ -25,7 +25,7 @@ export enum PLAYERS {
 /**
  * Default theme colors for each player
  */
-export const COLORS = ["#EA3556", "#61D2D6"];
+export const COLORS = ["#DE2184", "#2184DE"];
 
 /**
  * The default state where no moves have been made by either party
@@ -64,19 +64,10 @@ export class GameState {
   nextMoveRestriction: number;
   constructor() {
     this.board = DEFAULT_TABLE();
-    this.closedBoards = new Array(8);
+    this.closedBoards = new Array(9).fill(PLAYERS.NONE);
     this.nextTurn = PLAYERS.PLAYER1;
     this.nextMoveRestriction = -1;
   }
-}
-
-export const Game = {
-  board: DEFAULT_TABLE(),
-  closedBoards: new Array(8),
-  nextTurn: PLAYERS.PLAYER1,
-
-  // -1, indicates no move restriction (otherwise Board #1)
-  nextMoveRestriction: -1,
 }
 
 /**
