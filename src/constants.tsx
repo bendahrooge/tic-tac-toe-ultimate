@@ -10,6 +10,11 @@ export enum Scenes {
    * Game screen where the user can play
    */
   GAME,
+
+  /**
+   * Instructions on how to play the game
+   */
+  INSTRUCTIONS
 }
 
 /**

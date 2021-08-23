@@ -5,6 +5,8 @@ import { StyleSheet, View } from "react-native";
 import { Scenes, GlobalContext } from "./src/constants";
 import Menu from "./src/menu";
 import Game from "./src/game";
+import Instructions from "./src/Instructions";
+
 
 export default function App() {
   /**
@@ -19,6 +21,7 @@ export default function App() {
       >
         {scene === Scenes.MENU && <Menu />}
         {scene === Scenes.GAME && <Game />}
+        {scene === Scenes.INSTRUCTIONS && <Instructions />}
 
         <StatusBar style="auto" />
       </GlobalContext.Provider>

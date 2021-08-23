@@ -72,8 +72,8 @@ export const DetermineGameWiner = (currentBoard: any) => {
     }
 
 
-    console.log(board2D)
-    console.log(`Game winner: ${DetermineBoardWinner(board2D)} `);
+    // console.log(board2D)
+    // console.log(`Game winner: ${DetermineBoardWinner(board2D)} `);
 
     return DetermineBoardWinner(board2D);
 }

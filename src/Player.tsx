@@ -65,7 +65,9 @@ const styles = StyleSheet.create({
   },
   // Default player indicator styles
   text: {
+    fontFamily: "AppleSDGothicNeo-Bold",
     textAlign: "center",
+    color: "white",
     fontSize: 25,
   },
   default: {
@@ -82,6 +84,7 @@ const labelStyles = StyleSheet.create({
   label: {
     textAlign: "center",
     fontSize: 25,
+    fontFamily: "AppleSDGothicNeo-Bold",
     fontWeight: "bold",
     // fontSize: 15,
   },

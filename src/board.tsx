@@ -1,8 +1,7 @@
 import React, { useState, useReducer } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 
-import { DEFAULT_TABLE, PLAYERS, COLORS, GameState } from "./constants";
+import { PLAYERS, COLORS, GameState } from "./constants";
 import { PlayerIndicator, PlayerLabel } from "./Player";
 import {
   BoardHasPossibleMoves,
@@ -55,11 +54,11 @@ export default function Board(props: any) {
     let cell = props.location[2] * 3 + props.location[3];
 
     const onMove = (location: any) => {
-      console.log(
-        `The player moved into cell 1D ${location[2] * 3 + location[3]} or 2D ${
-          location[2]
-        },${location[3]}`
-      );
+      // console.log(
+      //   `The player moved into cell 1D ${location[2] * 3 + location[3]} or 2D ${
+      //     location[2]
+      //   },${location[3]}`
+      // );
 
       // Handle case if player moved after game winner already determined
       if (gameStack[gameStack.length - 1].winner != PLAYERS.NONE) {
@@ -133,9 +132,9 @@ export default function Board(props: any) {
       ) {
         // The next move must go in this specific square
         thisMove.nextMoveRestriction = location[2] * 3 + location[3];
-        console.log(
-          `Set a move restriction for ${location[2] * 3 + location[3]}`
-        );
+        // console.log(
+        //   `Set a move restriction for ${location[2] * 3 + location[3]}`
+        // );
       }
 
       // Flip the turn to the other player if it will be player 2's move
@@ -157,7 +156,11 @@ export default function Board(props: any) {
         props.location[0] * 3 + props.location[1] ||
         gameStack[gameStack.length - 1].nextMoveRestriction === -1) &&
       // Make sure that they cell is not already occupied
-      props.data === PLAYERS.NONE;
+      props.data === PLAYERS.NONE &&
+      // Make sure there is no winner in the game
+      gameStack[gameStack.length - 1].winner === PLAYERS.NONE
+      
+      ;
 
     return (
       <Pressable
@@ -173,20 +176,9 @@ export default function Board(props: any) {
             thisCellHighlighted ? styles.mustMoveBoard : null,
           ]}
         >
-          {/* <Text style={styles.label}> */}
-          {/* {Pla(
-              gameStack[gameStack.length - 1].board[props.location[0]][props.location[1]][
-                props.location[2]
-              ][props.location[3]]
-            )} */}
-          <PlayerLabel
-            // data={
-            //   props.gameState.board[props.location[0]][props.location[1]][
-            //     props.location[2]
-            //   ][props.location[3]]
-            // }
-            data={props.data}
-          />
+          <PlayerLabel data={props.data} />
+
+          {/* For debugging */}
           {/* B{board} */}
           {/* C{cell} */}
           {/* B{props.location[0]},{props.location[1]} */}
@@ -256,18 +248,18 @@ export default function Board(props: any) {
     }
 
     /**
-     * Game is won state: Only show winning boards
+     * Game is won state: Show winning boards with alternative background?
      */
-    if (gameStack[gameStack.length - 1].winner != PLAYERS.NONE && gameStack[gameStack.length - 1].winner != PLAYERS.TIE) {
-      return (
-        <View
-          style={[
-            styles.item,
-            ...CellBorders(props.location[0] * 3 + props.location[1]),
-          ]}
-        />
-      );
-    }
+    // if (gameStack[gameStack.length - 1].winner != PLAYERS.NONE && gameStack[gameStack.length - 1].winner != PLAYERS.TIE) {
+    //   return (
+    //     <View
+    //       style={[
+    //         styles.item,
+    //         ...CellBorders(props.location[0] * 3 + props.location[1]),
+    //       ]}
+    //     />
+    //   );
+    // }
 
     /**
      * Board is not won
@@ -303,19 +295,23 @@ export default function Board(props: any) {
    */
   return (
     <View style={styles.container}>
-      <View>
-        {/* <Text style={styles.logo}>Ultimate Tic Tac Toe</Text> */}
-      </View>
+      <View>{/* <Text style={styles.logo}>Ultimate Tic Tac Toe</Text> */}</View>
       <View>
         <PlayerIndicator
           playerName="Player X"
-          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1 && gameStack[gameStack.length - 1].winner != PLAYERS.PLAYER2}
+          active={
+            gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1 &&
+            gameStack[gameStack.length - 1].winner != PLAYERS.PLAYER2
+          }
           color={COLORS[0]}
           winner={gameStack[gameStack.length - 1].winner === PLAYERS.PLAYER1}
         />
         <PlayerIndicator
           playerName="Player O"
-          active={gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER2 && gameStack[gameStack.length - 1].winner != PLAYERS.PLAYER1}
+          active={
+            gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER2 &&
+            gameStack[gameStack.length - 1].winner != PLAYERS.PLAYER1
+          }
           color={COLORS[1]}
           winner={gameStack[gameStack.length - 1].winner === PLAYERS.PLAYER2}
         />
@@ -323,23 +319,42 @@ export default function Board(props: any) {
       <Row location={[0]} />
       <Row location={[1]} />
       <Row location={[2]} />
-      <View
-        style={[
-          undoBtnStyles.default,
-          !undoAllow ? undoBtnStyles.disabled : null,
-        ]}
-      >
-        <Pressable
-          onPress={() => {
-            if (undoAllow) {
-              setGameStack([...gameStack, gameStack[gameStack.length - 2]]);
-              setUndoAllow(false);
-            }
-          }}
+      {gameStack[gameStack.length - 1].winner === PLAYERS.NONE && (
+        <View
+          style={[
+            undoBtnStyles.default,
+            !undoAllow ? undoBtnStyles.disabled : null,
+          ]}
         >
-          <Text>Undo</Text>
-        </Pressable>
-      </View>
+          <Pressable
+            onPress={() => {
+              if (undoAllow) {
+                setGameStack([...gameStack, gameStack[gameStack.length - 2]]);
+                setUndoAllow(false);
+              }
+            }}
+          >
+            <Text style={undoBtnStyles.text}>Undo</Text>
+          </Pressable>
+        </View>
+      )}
+      {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && (
+        <View
+          style={[
+            undoBtnStyles.default,
+          ]}
+        >
+          <Pressable
+            onPress={() => {
+              // Reset to blank game state
+              setGameStack([new GameState()]);
+              setUndoAllow(false)
+            }}
+          >
+            <Text style={undoBtnStyles.text}>New Game</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -349,7 +364,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: 325,
     textAlign: "center",
-    fontFamily: "RampartOne-Regular"
+    fontFamily: "RampartOne-Regular",
     // padding: 25
   },
   container: {
@@ -436,11 +451,16 @@ const styles = StyleSheet.create({
 const undoBtnStyles = StyleSheet.create({
   default: {
     backgroundColor: "dodgerblue",
-    borderRadius: 5,
+    borderRadius: 7,
     marginTop: 10,
-    padding: 10,
+    padding: 15
   },
   disabled: {
     backgroundColor: "gray",
   },
+  text: {
+    fontFamily: "AppleSDGothicNeo-Bold",
+    color: "white",
+
+  }
 });
