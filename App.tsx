@@ -7,7 +7,6 @@ import Menu from "./src/menu";
 import Game from "./src/game";
 import Instructions from "./src/Instructions";
 
-
 export default function App() {
   /**
    * Init the context for the scene

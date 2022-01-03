@@ -1,5 +1,5 @@
 import React, { useState, useReducer } from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, Image } from "react-native";
 
 import { PLAYERS, COLORS, GameState } from "./constants";
 import { PlayerIndicator, PlayerLabel } from "./Player";
@@ -229,7 +229,7 @@ export default function Board(props: any) {
       gameStack[gameStack.length - 1].closedBoards[
         props.location[0] * 3 + props.location[1]
       ];
-    if (boardWinner != PLAYERS.NONE) {
+    if (boardWinner != PLAYERS.NONE && boardWinner != PLAYERS.TIE) {
       return (
         <View
           style={[
@@ -296,6 +296,12 @@ export default function Board(props: any) {
   return (
     <View style={styles.container}>
       <View>{/* <Text style={styles.logo}>Ultimate Tic Tac Toe</Text> */}</View>
+      <View>
+        {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && <Image
+          style={styles.trophy}
+          source={require("./../assets/trophy.png")} 
+        />}
+      </View>
       <View>
         <PlayerIndicator
           playerName="Player X"
@@ -445,6 +451,13 @@ const styles = StyleSheet.create({
   },
   player2: {
     color: COLORS[1],
+  },
+
+  trophy: {
+    height: 150,
+    width: 425,
+    marginBottom: 10,
+    // top: 100
   },
 });
 
