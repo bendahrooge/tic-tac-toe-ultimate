@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, Dimensions, Platform, PixelRatio } from "react-native";
 import { PLAYERS, COLORS } from "./constants";
 
 /**
@@ -80,13 +80,34 @@ const styles = StyleSheet.create({
   },
 });
 
+const {
+  width: SCREEN_WIDTH,
+  height: SCREEN_HEIGHT,
+} = Dimensions.get('window');
+
+/**
+ * Source: https://stackoverflow.com/questions/33628677/react-native-responsive-font-size
+ */
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320;
+
+export function normalize(size: number) {
+  const newSize = size * scale 
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize))
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
+  }
+}
+
+
 const labelStyles = StyleSheet.create({
   label: {
     textAlign: "center",
-    fontSize: 25,
+    fontSize: normalize(15),
     fontFamily: "AppleSDGothicNeo-Bold",
     fontWeight: "bold",
-    // fontSize: 15,
   },
   player1: {
     color: COLORS[0],

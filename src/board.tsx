@@ -393,8 +393,8 @@ const styles = StyleSheet.create({
     // borderColor: "red",
   },
   miniItem: {
-    height: 35,
-    width: 35,
+    height: "5vw",
+    width: "5vw",
     backgroundColor: "#ddd",
     // margin: 5,
     // padding: 5,
