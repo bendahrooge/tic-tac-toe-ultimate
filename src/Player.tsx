@@ -105,7 +105,7 @@ export function normalize(size: number) {
 const labelStyles = StyleSheet.create({
   label: {
     textAlign: "center",
-    fontSize: normalize(15),
+    fontSize: normalize(26),
     fontFamily: "AppleSDGothicNeo-Bold",
     fontWeight: "bold",
   },

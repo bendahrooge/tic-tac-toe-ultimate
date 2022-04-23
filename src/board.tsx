@@ -1,13 +1,22 @@
-import React, { useState, useReducer } from "react";
-import { StyleSheet, Text, View, Pressable, Image } from "react-native";
+import React, { useState, useReducer } from "react"
+import {
+  StyleSheet,
+  Text,
+  View,
+  Pressable,
+  Image,
+  Dimensions,
+  Platform,
+  PixelRatio,
+} from "react-native"
 
-import { PLAYERS, COLORS, GameState } from "./constants";
-import { PlayerIndicator, PlayerLabel } from "./Player";
+import { PLAYERS, COLORS, GameState } from "./constants"
+import { PlayerIndicator, PlayerLabel } from "./Player"
 import {
   BoardHasPossibleMoves,
   DetermineBoardWinner,
   DetermineGameWiner,
-} from "./logic";
+} from "./logic"
 
 /**
  * Calls the matchHandler if any of the targets match the source
@@ -18,40 +27,40 @@ import {
 const matchesAny = (source: any, targets: any[], matchHandler: () => void) => {
   targets.forEach((element: any) => {
     if (source === element) {
-      matchHandler();
+      matchHandler()
     }
-  });
-};
+  })
+}
 
 const CellBorders = (sequence: number) => {
-  let cellStyles: any[] = [];
+  let cellStyles: any[] = []
 
   matchesAny(sequence, [0, 1, 2], () => {
-    cellStyles.push(styles.noBorderTop);
-  });
+    cellStyles.push(styles.noBorderTop)
+  })
 
   matchesAny(sequence, [0, 3, 6], () => {
-    cellStyles.push(styles.noBorderLeft);
-  });
+    cellStyles.push(styles.noBorderLeft)
+  })
 
   matchesAny(sequence, [2, 5, 8], () => {
-    cellStyles.push(styles.noBorderRight);
-  });
+    cellStyles.push(styles.noBorderRight)
+  })
 
   matchesAny(sequence, [6, 7, 8], () => {
-    cellStyles.push(styles.noBorderBottom);
-  });
+    cellStyles.push(styles.noBorderBottom)
+  })
 
-  return cellStyles;
-};
+  return cellStyles
+}
 
 export default function Board(props: any) {
-  const [gameStack, setGameStack] = useState([new GameState()]);
-  const [undoAllow, setUndoAllow] = useState(false);
+  const [gameStack, setGameStack] = useState([new GameState()])
+  const [undoAllow, setUndoAllow] = useState(false)
 
   const Cell = (props: any) => {
-    let board = props.location[0] * 3 + props.location[1];
-    let cell = props.location[2] * 3 + props.location[3];
+    let board = props.location[0] * 3 + props.location[1]
+    let cell = props.location[2] * 3 + props.location[3]
 
     const onMove = (location: any) => {
       // console.log(
@@ -62,7 +71,7 @@ export default function Board(props: any) {
 
       // Handle case if player moved after game winner already determined
       if (gameStack[gameStack.length - 1].winner != PLAYERS.NONE) {
-        return;
+        return
       }
 
       // Determine if move is valid
@@ -73,7 +82,7 @@ export default function Board(props: any) {
           location[2]
         ][location[3]] != PLAYERS.NONE
       ) {
-        return;
+        return
       }
 
       // Was this board valid based on the precding cell restructuons?
@@ -83,44 +92,44 @@ export default function Board(props: any) {
           gameStack[gameStack.length - 1].nextMoveRestriction
         ) {
           // Display an error message to the user?
-          return;
+          return
         }
       }
 
       // Create a new instance to store this's moves game information
-      let thisMove = new GameState();
+      let thisMove = new GameState()
 
       // Copy existing moves and closed boards
       // This JSON parsing is a tempoary fix to copying arrays immutably i swear (double nested arrays are hard)
       // https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript
       thisMove.board = JSON.parse(
         JSON.stringify(gameStack[gameStack.length - 1].board)
-      );
+      )
 
       thisMove.closedBoards = Object.assign(
         [],
         gameStack[gameStack.length - 1].closedBoards
-      );
+      )
 
       // Move the player
       thisMove.board[location[0]][location[1]][location[2]][location[3]] =
-        gameStack[gameStack.length - 1].nextTurn;
+        gameStack[gameStack.length - 1].nextTurn
 
       // Unlock undo more if it was locked
-      setUndoAllow(true);
+      setUndoAllow(true)
 
       // Determine if any board winner(s) and update closed boards
-      let boardNumber = 0;
+      let boardNumber = 0
       thisMove.board.forEach((row) => {
         row.forEach((board) => {
           if (DetermineBoardWinner(board) != PLAYERS.NONE) {
             // Consider this a closed board
-            thisMove.closedBoards[boardNumber] = DetermineBoardWinner(board);
+            thisMove.closedBoards[boardNumber] = DetermineBoardWinner(board)
           }
 
-          boardNumber++;
-        });
-      });
+          boardNumber++
+        })
+      })
 
       // Set restriction for next player if there is one
 
@@ -131,7 +140,7 @@ export default function Board(props: any) {
         thisMove.closedBoards[location[2] * 3 + location[3]] === PLAYERS.NONE
       ) {
         // The next move must go in this specific square
-        thisMove.nextMoveRestriction = location[2] * 3 + location[3];
+        thisMove.nextMoveRestriction = location[2] * 3 + location[3]
         // console.log(
         //   `Set a move restriction for ${location[2] * 3 + location[3]}`
         // );
@@ -140,15 +149,15 @@ export default function Board(props: any) {
       // Flip the turn to the other player if it will be player 2's move
       // The next player is player1 by default (see class consturctor)
       if (gameStack[gameStack.length - 1].nextTurn === PLAYERS.PLAYER1) {
-        thisMove.nextTurn = PLAYERS.PLAYER2;
+        thisMove.nextTurn = PLAYERS.PLAYER2
       }
 
       // Check if there is a winner using the closed boards data entrh
-      thisMove.winner = DetermineGameWiner(thisMove.closedBoards);
+      thisMove.winner = DetermineGameWiner(thisMove.closedBoards)
 
       // Push the current state to the end of the stack
-      setGameStack([...gameStack, thisMove]);
-    };
+      setGameStack([...gameStack, thisMove])
+    }
 
     let thisCellHighlighted =
       // Check if move retriction is defined, or -1 for open move
@@ -159,13 +168,11 @@ export default function Board(props: any) {
       props.data === PLAYERS.NONE &&
       // Make sure there is no winner in the game
       gameStack[gameStack.length - 1].winner === PLAYERS.NONE
-      
-      ;
 
     return (
       <Pressable
         onPressIn={() => {
-          onMove(props.location);
+          onMove(props.location)
         }}
       >
         <View
@@ -186,8 +193,8 @@ export default function Board(props: any) {
           {/* </Text> */}
         </View>
       </Pressable>
-    );
-  };
+    )
+  }
 
   const InnerRow = (props: any) => (
     <View style={[styles.miniRow]}>
@@ -219,7 +226,7 @@ export default function Board(props: any) {
         gameState={gameStack[gameStack.length - 1]}
       />
     </View>
-  );
+  )
 
   const InnerBoard = (props: any) => {
     /**
@@ -228,7 +235,7 @@ export default function Board(props: any) {
     let boardWinner =
       gameStack[gameStack.length - 1].closedBoards[
         props.location[0] * 3 + props.location[1]
-      ];
+      ]
     if (boardWinner != PLAYERS.NONE && boardWinner != PLAYERS.TIE) {
       return (
         <View
@@ -244,7 +251,7 @@ export default function Board(props: any) {
             <Text style={[styles.winBoard, styles.player2]}>O</Text>
           )}
         </View>
-      );
+      )
     }
 
     /**
@@ -278,8 +285,8 @@ export default function Board(props: any) {
         <InnerRow location={[...props.location, 1]} />
         <InnerRow location={[...props.location, 2]} />
       </View>
-    );
-  };
+    )
+  }
 
   const Row = (props: any) => (
     <View style={styles.row}>
@@ -288,7 +295,7 @@ export default function Board(props: any) {
       <InnerBoard location={[...props.location, 1]} />
       <InnerBoard location={[...props.location, 2]} />
     </View>
-  );
+  )
 
   /**
    * Rows of the main board
@@ -297,10 +304,12 @@ export default function Board(props: any) {
     <View style={styles.container}>
       <View>{/* <Text style={styles.logo}>Ultimate Tic Tac Toe</Text> */}</View>
       <View>
-        {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && <Image
-          style={styles.trophy}
-          source={require("./../assets/trophy.png")} 
-        />}
+        {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && (
+          <Image
+            style={styles.trophy}
+            source={require("./../assets/trophy.png")}
+          />
+        )}
       </View>
       <View>
         <PlayerIndicator
@@ -335,8 +344,8 @@ export default function Board(props: any) {
           <Pressable
             onPress={() => {
               if (undoAllow) {
-                setGameStack([...gameStack, gameStack[gameStack.length - 2]]);
-                setUndoAllow(false);
+                setGameStack([...gameStack, gameStack[gameStack.length - 2]])
+                setUndoAllow(false)
               }
             }}
           >
@@ -345,15 +354,11 @@ export default function Board(props: any) {
         </View>
       )}
       {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && (
-        <View
-          style={[
-            undoBtnStyles.default,
-          ]}
-        >
+        <View style={[undoBtnStyles.default]}>
           <Pressable
             onPress={() => {
               // Reset to blank game state
-              setGameStack([new GameState()]);
+              setGameStack([new GameState()])
               setUndoAllow(false)
             }}
           >
@@ -362,7 +367,25 @@ export default function Board(props: any) {
         </View>
       )}
     </View>
-  );
+  )
+}
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window")
+
+/**
+ * Source: https://stackoverflow.com/questions/33628677/react-native-responsive-font-size
+ */
+
+// based on iphone 5s's scale
+const scale = SCREEN_WIDTH / 320
+
+export function normalize(size: number) {
+  const newSize = size * scale
+  if (Platform.OS === "ios") {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize))
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
+  }
 }
 
 const styles = StyleSheet.create({
@@ -393,8 +416,8 @@ const styles = StyleSheet.create({
     // borderColor: "red",
   },
   miniItem: {
-    height: "5vw",
-    width: "5vw",
+    height: normalize(30),
+    width: normalize(30),
     backgroundColor: "#ddd",
     // margin: 5,
     // padding: 5,
@@ -431,9 +454,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#98ffcc", //#EBF30C // #F7B9DD
   },
   winBoard: {
-    fontSize: 85,
-    width: 105,
-    height: 105,
+    fontSize: normalize(70),
+    width: "27vw",
+    height: "27vw",
     textAlign: "center",
   },
 
@@ -459,14 +482,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     // top: 100
   },
-});
+})
 
 const undoBtnStyles = StyleSheet.create({
   default: {
     backgroundColor: "dodgerblue",
     borderRadius: 7,
     marginTop: 10,
-    padding: 15
+    padding: 15,
   },
   disabled: {
     backgroundColor: "gray",
@@ -474,6 +497,5 @@ const undoBtnStyles = StyleSheet.create({
   text: {
     fontFamily: "AppleSDGothicNeo-Bold",
     color: "white",
-
-  }
-});
+  },
+})
