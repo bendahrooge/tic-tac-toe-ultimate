@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#98ffcc", //#EBF30C // #F7B9DD
   },
   winBoard: {
-    fontSize: normalize(70),
+    fontSize: parseInt(normalize(70).toString()),
     width: normalize(88.5),
     height: normalize(80),
     textAlign: "center",
