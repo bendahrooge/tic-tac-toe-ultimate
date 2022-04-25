@@ -1,17 +1,17 @@
-import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StatusBar } from "expo-status-bar"
+import React, { useState } from "react"
+import { StyleSheet, View } from "react-native"
 
-import { Scenes, GlobalContext } from "./src/constants";
-import Menu from "./src/menu";
-import Game from "./src/game";
-import Instructions from "./src/Instructions";
+import { Scenes, GlobalContext } from "./src/constants"
+import Menu from "./src/menu"
+import Game from "./src/game"
+import Instructions from "./src/Instructions"
 
 export default function App() {
   /**
    * Init the context for the scene
    */
-  const [scene, setScene] = useState(Scenes.MENU);
+  const [scene, setScene] = useState(Scenes.MENU)
 
   return (
     <View style={styles.container}>
@@ -25,7 +25,7 @@ export default function App() {
         <StatusBar style="auto" />
       </GlobalContext.Provider>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -34,4 +34,4 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-});
+})

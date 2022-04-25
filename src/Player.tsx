@@ -1,6 +1,15 @@
-import React from "react";
-import { StyleSheet, Text, View, Pressable, Dimensions, Platform, PixelRatio } from "react-native";
-import { PLAYERS, COLORS } from "./constants";
+import React from "react"
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Pressable,
+  Dimensions,
+  Platform,
+  PixelRatio,
+} from "react-native"
+import { PLAYERS, COLORS } from "./constants"
 
 /**
  * Shows the label for the player on the board or
@@ -17,8 +26,8 @@ export const PlayerLabel = (props: any) => {
         <Text style={[labelStyles.label, labelStyles.player2]}>O</Text>
       )}
     </View>
-  );
-};
+  )
+}
 
 /**
  * Displays an indicator at the top for current move, winner, loser, etc.
@@ -30,7 +39,7 @@ export const PlayerIndicator = (props: any) => {
     active: {
       backgroundColor: props.color,
     },
-  });
+  })
 
   return (
     <View
@@ -50,8 +59,8 @@ export const PlayerIndicator = (props: any) => {
         {props.playerName || "Participant"}
       </Text>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   // Style used if player indicator is inactive (greyed out text)
@@ -78,29 +87,25 @@ const styles = StyleSheet.create({
     // borderRadius: 25,
     padding: 10,
   },
-});
+})
 
-const {
-  width: SCREEN_WIDTH,
-  height: SCREEN_HEIGHT,
-} = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window")
 
 /**
  * Source: https://stackoverflow.com/questions/33628677/react-native-responsive-font-size
  */
 
 // based on iphone 5s's scale
-const scale = SCREEN_WIDTH / 320;
+const scale = SCREEN_WIDTH / 320
 
 export function normalize(size: number) {
-  const newSize = size * scale 
-  if (Platform.OS === 'ios') {
+  const newSize = size * scale
+  if (Platform.OS === "ios") {
     return Math.round(PixelRatio.roundToNearestPixel(newSize))
   } else {
     return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
   }
 }
-
 
 const labelStyles = StyleSheet.create({
   label: {
@@ -115,4 +120,4 @@ const labelStyles = StyleSheet.create({
   player2: {
     color: COLORS[1],
   },
-});
+})

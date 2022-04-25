@@ -303,14 +303,33 @@ export default function Board(props: any) {
   return (
     <View style={styles.container}>
       <View>{/* <Text style={styles.logo}>Ultimate Tic Tac Toe</Text> */}</View>
-      <View>
-        {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && (
+      {gameStack[gameStack.length - 1].winner != PLAYERS.NONE && (
+        <View style={styles.gameOver}>
           <Image
             style={styles.trophy}
             source={require("./../assets/trophy.png")}
           />
-        )}
-      </View>
+
+          <Text style={styles.winIndicator}>
+            {gameStack[gameStack.length - 1].winner === PLAYERS.PLAYER1
+              ? "Player X"
+              : "Player O"}
+          </Text>
+
+          <View style={[undoBtnStyles.default]}>
+            <Pressable
+              onPress={() => {
+                // Reset to blank game state
+                setGameStack([new GameState()])
+                setUndoAllow(false)
+              }}
+            >
+              <Text style={undoBtnStyles.text}>New Game</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       <View>
         <PlayerIndicator
           playerName="Player X"
@@ -412,6 +431,9 @@ const styles = StyleSheet.create({
   item: {
     backgroundColor: "#ddd",
     // margin: 5,
+    // height: normalize(30 * 3 + 5),
+    // width: normalize(30 * 3 + 5),
+
     borderWidth: 5,
     // borderColor: "red",
   },
@@ -455,8 +477,8 @@ const styles = StyleSheet.create({
   },
   winBoard: {
     fontSize: normalize(70),
-    width: "27vw",
-    height: "27vw",
+    width: normalize(88.5),
+    height: normalize(80),
     textAlign: "center",
   },
 
@@ -476,11 +498,35 @@ const styles = StyleSheet.create({
     color: COLORS[1],
   },
 
+  // Winner modal styles
   trophy: {
-    height: 150,
-    width: 425,
+    width: normalize(100 * 2.83), // Image ratio is 1:2.2833
+    height: normalize(100),
     marginBottom: 10,
-    // top: 100
+    zIndex: 1,
+  },
+
+  gameOver: {
+    position: "absolute",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    top: 0,
+    left: 0,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    zIndex: 10,
+    elevation: 10,
+  },
+
+  winIndicator: {
+    marginTop: normalize(-20),
+    marginBottom: normalize(10),
+    fontSize: normalize(12),
+    color: "white",
+    zIndex: 2,
+    elevation: 2,
   },
 })
 
